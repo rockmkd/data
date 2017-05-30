@@ -1,0 +1,1 @@
+mimeType = {"html": "text/html", "css": "text/style", "js": "application/javascript", "json": "application/json", "png": "image/png", "jpg": "image/jpeg" }

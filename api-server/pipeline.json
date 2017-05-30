@@ -1,0 +1,15 @@
+[
+    {
+      "name": "channel-pt-web-log",
+      "pipelines": [
+        {"host": "localhost", "id": "HBaseHTTPc33abf31-b59c-4955-86ca-1e5a4444832f"},
+        {"host": "localhost", "id": "HBaseHTTPc33abf31-b59c-4955-86ca-1e5a4444832f"}
+      ]
+    },
+    {
+      "name": "channel-pt-web-log1",
+      "pipelines": [
+        {"host": "127.0.0.1", "id": "httpserverorigin9c73a1f6-4256-4335-b25c-f8e4fbe85371"}
+      ]
+    }
+]

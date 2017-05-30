@@ -1,0 +1,43 @@
+<clr-main-container>
+  <header class="header-6">
+    <div class="branding">
+        <a href="..." class="nav-link">
+            <clr-icon shape="line-chart"></clr-icon>
+            <span class="title">Monitoring Dashboard</span>
+        </a>
+    </div>
+</header>
+
+    <div *ngFor="let group of status">
+      <table class="table">
+        <caption>{{group.name}}</caption>
+        <thead>
+          <tr>
+            <th rowspan="2">호스트명</th>
+            <th rowspan="2">상태</th>
+            <th colspan="2">에러건수</th>
+            <th colspan="4">정상처리건수</th>
+            <th rowspan="2">JVM</th>
+            <th rowspan="2">명령</th>
+          </tr>
+          <tr>
+            <th>5분</th><th>24시간</th><th>1분</th><th>5분</th><th>1시간</th><th>24시간</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pipeline of group.pipelines">
+              <td>{{pipeline.host}}</td>
+              <td>{{pipeline.status}}</td>
+              <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.errorCount['1m']}}</span></td>
+              <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.errorCount['24h']}}</span></td>
+              <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['1m']}}</span></td>
+              <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['5m']}}</span></td>
+              <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['1h']}}</span></td>
+              <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['24h']}}</span></td>
+              <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.jvm['heapUsed']}}</span></td>
+              <td><button>start</button><button>stop</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+</clr-main-container>
