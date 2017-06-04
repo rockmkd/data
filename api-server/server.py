@@ -70,15 +70,18 @@ class Handler(BaseHTTPRequestHandler):
 
     def _do_get_static_resource(self, path):
         try:
-            f = open(curdir + 'htdocs' + sep + path)
-        except IOError:
-            self.send_response(404)
+            print curdir + '/htdocs' + path
+            f = open(curdir + '/htdocs' + path)
+        except IOError as e:
+            # print e
+            # self.send_response(404)
             response_data = "404 Not Found"
         else:
             self.send_response(200)
             response_data = f.read()
         finally:
             self.send_header('Content-Type', mimeType[path.split(".")[-1]])
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
 
             self.wfile.write(response_data)
