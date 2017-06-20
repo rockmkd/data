@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { Http } from "@angular/http";
+import { Http } from '@angular/http';
 import { Observable } from "rxjs";
+import {concatMap} from "rxjs/operator/concatMap";
 
 @Component({
   selector: 'app-root',
@@ -9,94 +10,96 @@ import { Observable } from "rxjs";
 })
 
 export class AppComponent {
-  /**
-  status = []
-  **/
   private status = [];
   private hosts = [];
+  private pipelines = [];
 
-  constructor(private http: Http){
+  constructor(private http: Http) {
 
     // setInterval( () => {
     this.http.get('http://localhost:8000/hosts.json')
-      .map(result => result.json() )
-      .subscribe( hosts => {
+      .map(result => result.json())
+      .subscribe(hosts => {
         this.hosts = hosts;
+        this.refreshStatus();
       });
-    //     pipelineGroups.forEach( pipelineGroup => {
-    //       let group = {"name": pipelineGroup.name, pipelines: []};
-    //       this.status.push(group);
-    //
-    //       pipelineGroup.pipelines.forEach(pipeline => {
-    //         this.getStatus(pipeline.host, pipeline.id ).subscribe( status => {
-    //           let pipelineStatus = {
-    //             "host": pipeline.host,
-    //             "status": status.status,
-    //             "metrics": this.parseMetrics(status.metrics)
-    //           }
-    //           group.pipelines.push( pipelineStatus );
-    //           if ( !pipelineStatus.metrics ){
-    //             this.getMetrics(pipeline.host, pipeline.id ).subscribe( metrics => {
-    //                 pipelineStatus.metrics = this.parseMetrics(metrics);
-    //             });
-    //           }
-    //         })
-    //       })
-    //     })
-    //   })
-    // }, 5000);
-
-      // this.pipelineGroups = pipelineGroups;
-      // pipelineGroups.forEach( pipelineGroup => {
-      //   pipelineGroup.pipelines.map( (pipeline) => {
-      //     let url = `http://localhost:8000/status?host=${pipeline.host}&pipelineId=${pipeline.pipelineId}`;
-      //
-      //     this.http.get(url).subscribe( result => {
-      //       if ( !this.status[pipelineGroup.name] ) {
-      //         this.status[pipelineGroup.name] = {};
-      //       }
-      //       let beforeTransform = result.json();
-      //       beforeTransform['metrics'] = JSON.parse(beforeTransform['metrics']);
-      //       this.status[pipelineGroup.name][pipeline.pipelineId] = beforeTransform;
-      //     })
-      //   })
-      // })
   }
 
-  hostStatus() {
-    this.hosts.map( host => {
-      this.getPipelines(host).subscribe( pipelines => {
-        console.log( host);
-        console.log( pipelines );
-      });
-    })
+  _addHost(host, pipelines) {
+    return pipelines.map( pipeline => {
+      pipeline.host = host;
+      return pipeline
+    });
   }
 
+  private concatPipelineAndStatus = (pipeline, status) => Object.assign(pipeline, status);
+
+  private concatPipelineAndMetric = (pipeline, metric) => {
+    if (!pipeline.metrics){
+      pipeline.metrics = metric;
+    }
+
+    return pipeline;
+  };
+
+  private refinePipelineMetrics = pipeline => {
+    if (pipeline.metrics){
+      pipeline.metrics = this.parseMetrics(pipeline.metrics);
+    }
+
+    return pipeline;
+  };
+
+  refreshStatus() {
+    this.pipelines = [];
+
+    Observable.from(this.hosts)
+      .flatMap(host => this.getPipelines(host), this._addHost)
+      .flatMap(pipelines => Observable.from(pipelines))
+      .flatMap(pipeline => this.getStatus(pipeline), this.concatPipelineAndStatus)
+      .flatMap(pipeline => this.getMetrics(pipeline), this.concatPipelineAndMetric)
+      .map(this.refinePipelineMetrics)
+      .subscribe(pipeline => { this.pipelines.push(pipeline); console.log( this.pipelines )});
+
+
+  }
 
   getPipelines(host: String){
-    let url = `http://localhost:8000/metrics?host=${host}$path=/pipelines`;
+    const url = `http://localhost:8000/api?host=${host}&path=/pipelines`;
     return this.http.get(url).map( result => {
       return result.json();
     });
   }
 
-  getMetrics(host: String, pipelineId: String){
-    let url = `http://localhost:8000/metrics?host=${host}&pipelineId=${pipelineId}`;
+  getMetrics(pipeline: any){
+    const host = pipeline.host;
+    const id = pipeline.pipelineId;
+
+    const url = `http://localhost:8000/api?host=${host}&path=/pipeline/${id}/metrics`;
+    return this.http.get(url).map( result => {
+      if ( result.text() ) {
+        return result.json()
+      }else{
+        return ""
+      }
+    })
+  }
+
+  getStatus(pipeline: any){
+    const host = pipeline.host;
+    const id = pipeline.pipelineId;
+    const url = `http://localhost:8000/api?host=${host}&path=/pipeline/${id}/status`;
     return this.http.get(url).map( result => {
       return result.json()
+    }).map( status => {
+      if ( status.metrics ){
+        status.metrics = JSON.parse( status.metrics );
+      }
+      return status;
     })
   }
 
-  getStatus(host: String, pipelineId: String){
-    let url = `http://localhost:8000/status?host=${host}&pipelineId=${pipelineId}`;
-    return this.http.get(url).map( result => {
-      let transformedData = result.json();
-      transformedData['metrics'] = JSON.parse(transformedData['metrics']);
-      return transformedData;
-    })
-  }
-
-  parseMetrics(metrics: any){
+  private parseMetrics(metrics: any){
     if ( metrics ){
       return {
         "errorCount": {
@@ -114,7 +117,7 @@ export class AppComponent {
         "jvm": {
           "heapUsed": (metrics['gauges']['jvm.memory.heap.used']['value'] / 1024 / 1024 | 0) + 'MB'
         }
-      }
+      };
     }
   }
 }
