@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Http } from '@angular/http';
 import { Observable } from "rxjs";
-import {concatMap} from "rxjs/operator/concatMap";
+import { Pipeline } from './model/pipeline';
 
 @Component({
   selector: 'app-root',
@@ -10,22 +10,17 @@ import {concatMap} from "rxjs/operator/concatMap";
 })
 
 export class AppComponent {
-  private status = [];
-  private hosts = [];
-  private pipelines = [];
+  private pipelines: Pipeline[] = [];
 
   constructor(private http: Http) {
-
-    // setInterval( () => {
     this.http.get('http://localhost:8000/hosts.json')
       .map(result => result.json())
       .subscribe(hosts => {
-        this.hosts = hosts;
-        this.refreshStatus();
+        this.initPipelines(hosts);
       });
   }
 
-  _addHost(host, pipelines) {
+  private addHost(host, pipelines) {
     return pipelines.map( pipeline => {
       pipeline.host = host;
       return pipeline
@@ -50,28 +45,29 @@ export class AppComponent {
     return pipeline;
   };
 
-  refreshStatus() {
+  initPipelines(hosts: string[]) {
     this.pipelines = [];
 
-    Observable.from(this.hosts)
-      .flatMap(host => this.getPipelines(host), this._addHost)
-      .flatMap(pipelines => Observable.from(pipelines))
-      .flatMap(pipeline => this.getStatus(pipeline), this.concatPipelineAndStatus)
-      .flatMap(pipeline => this.getMetrics(pipeline), this.concatPipelineAndMetric)
+    Observable.from(hosts)
+      .flatMap(host => this.getPipelines(host), this.addHost)
+      .flatMap( pipelinesData => Observable.from(pipelinesData))
+      .map( rawData => new Pipeline(rawData) )
+      .flatMap( (pipeline: Pipeline) => this.getStatus(pipeline), this.concatPipelineAndStatus)
+      .flatMap( (pipeline: Pipeline) => this.getMetrics(pipeline), this.concatPipelineAndMetric)
       .map(this.refinePipelineMetrics)
-      .subscribe(pipeline => { this.pipelines.push(pipeline); console.log( this.pipelines )});
-
-
+      .subscribe( (pipeline: Pipeline) => {
+        this.pipelines.push(pipeline);
+      });
   }
 
-  getPipelines(host: String){
+  private getPipelines(host: String){
     const url = `http://localhost:8000/api?host=${host}&path=/pipelines`;
     return this.http.get(url).map( result => {
       return result.json();
     });
   }
 
-  getMetrics(pipeline: any){
+  private getMetrics(pipeline: Pipeline){
     const host = pipeline.host;
     const id = pipeline.pipelineId;
 
@@ -85,7 +81,7 @@ export class AppComponent {
     })
   }
 
-  getStatus(pipeline: any){
+  private getStatus(pipeline: any){
     const host = pipeline.host;
     const id = pipeline.pipelineId;
     const url = `http://localhost:8000/api?host=${host}&path=/pipeline/${id}/status`;
@@ -102,17 +98,17 @@ export class AppComponent {
   private parseMetrics(metrics: any){
     if ( metrics ){
       return {
-        "errorCount": {
-          "1m": metrics['meters']['pipeline.batchErrorRecords.meter']['m1_rate'],
-          "5m": metrics['meters']['pipeline.batchErrorRecords.meter']['m5_rate'],
-          "1h": metrics['meters']['pipeline.batchErrorRecords.meter']['h1_rate'],
-          "24h": metrics['meters']['pipeline.batchErrorRecords.meter']['h24_rate']
+        "errorRate": {
+          "1m": metrics['meters']['pipeline.batchErrorRecords.meter']['m1_rate'].toFixed(1),
+          "5m": metrics['meters']['pipeline.batchErrorRecords.meter']['m5_rate'].toFixed(1),
+          "1h": metrics['meters']['pipeline.batchErrorRecords.meter']['h1_rate'].toFixed(1),
+          "24h": metrics['meters']['pipeline.batchErrorRecords.meter']['h24_rate'].toFixed(1)
         },
-        "recordCount": {
-          "1m": metrics['meters']['pipeline.batchInputRecords.meter']['m1_rate'],
-          "5m": metrics['meters']['pipeline.batchInputRecords.meter']['m5_rate'],
-          "1h": metrics['meters']['pipeline.batchInputRecords.meter']['h1_rate'],
-          "24h": metrics['meters']['pipeline.batchInputRecords.meter']['h24_rate']
+        "recordRate": {
+          "1m": metrics['meters']['pipeline.batchInputRecords.meter']['m1_rate'].toFixed(1),
+          "5m": metrics['meters']['pipeline.batchInputRecords.meter']['m5_rate'].toFixed(1),
+          "1h": metrics['meters']['pipeline.batchInputRecords.meter']['h1_rate'].toFixed(1),
+          "24h": metrics['meters']['pipeline.batchInputRecords.meter']['h24_rate'].toFixed(1)
         },
         "jvm": {
           "heapUsed": (metrics['gauges']['jvm.memory.heap.used']['value'] / 1024 / 1024 | 0) + 'MB'

@@ -15,8 +15,8 @@ def is_index_path(path):
     return path in ["", "/"]
 
 
-def sdc_api_request(host, path):
-    request = urllib2.Request('http://%s:18630/rest/v1%s' % (host, path))
+def sdc_api_request(host, path, data):
+    request = urllib2.Request('http://%s:18630/rest/v1%s' % (host, path), data)
     base64string = base64.encodestring('%s:%s' % ("admin", "admin")).replace('\n', '')
     request.add_header("Authorization", "Basic %s" % base64string)
     request.add_header("Content-type", "application/json")
@@ -38,14 +38,14 @@ class Handler(BaseHTTPRequestHandler):
             path = "index.html"
 
         if path == "/api":
-            self._do_get_api_request(parsed_url.query)
+            self._do_api_request(parsed_url.query)
         elif re.search('(\.html|\.css|\.js|\.json|\.png|\.jpg)$',  path):
             self._do_get_static_resource(path)
         else:
             self.send_response(404)
             self.end_headers()
 
-    def _do_get_api_request(self, query):
+    def _do_api_request(self, query, data=None):
         query_data = parse_qs(query, 1)
 
         response_data = ""
@@ -54,15 +54,17 @@ class Handler(BaseHTTPRequestHandler):
             path = query_data['path'][0]
         except KeyError as e:
             self.send_response(500)
+            self.send_header('Access-Control-Allow-Origin', '*')
             response_data = "KeyError: %s" % e.message
         else:
             try:
-                response_data = sdc_api_request(host, path)
+                response_data = sdc_api_request(host, path, data)
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
             except ValueError as e:
                 self.send_response(500)
+                self.send_header('Access-Control-Allow-Origin', '*')
                 response_data = e.message
         finally:
             self.end_headers()
@@ -87,22 +89,16 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(response_data)
 
     def do_POST(self):
-        length = int(self.headers.getheader('content-length'))
-        read_str = self.rfile.read(length);
-        # data = cgi.parse_qs(, keep_blank_values=1)
-        # data2 = json.loads(self.rfile.read(length))
-        data = json.loads(read_str)
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
 
-        print data
-        url = data['url']
-        response = urllib2.urlopen(url)
-        json_data = json.loads(response.read())
-        print json_data
-        # print self.request.text
-        # print data2
+        data = ""
+        if path == "/api":
+            self._do_api_request(parsed_url.query, data)
+        else:
+            self.send_response(404)
+            self.end_headers()
 
-        self.send_response(200)
-        self.end_headers()
 
 
 SocketServer.TCPServer.allow_reuse_address = True

@@ -1,1 +1,24 @@
+.warning {
+  /*-webkit-animation-duration: 5s;*/
+  /*-webkit-animation-name: warn-animation;*/
+  /*-webkit-animation-iteration-count: infinite;*/
+  padding: 5px;
+  border-radius: 10px;
+}
 
+@-webkit-keyframes warn-animation {
+  form{
+    background-color: #fff;
+    color: #000;
+  }
+
+  50% {
+    background-color: #f00;
+    color: #fff;
+  }
+
+  to {
+    background-color: #fff;
+    color: #000;
+  }
+}

@@ -6,36 +6,35 @@
             <span class="title">Monitoring Dashboard</span>
         </a>
     </div>
-</header>
-    <table class="table">
-      <thead>
-        <tr>
-          <th rowspan="2">hostname</th>
-          <th rowspan="2">pipeline name</th>
-          <th rowspan="2">status</th>
-          <th colspan="2">에러건수</th>
-          <th colspan="4">정상처리건수</th>
-          <th rowspan="2">JVM</th>
-          <th rowspan="2">명령</th>
-        </tr>
-        <tr>
-          <th>5분</th><th>24시간</th><th>1분</th><th>5분</th><th>1시간</th><th>24시간</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let pipeline of pipelines">
-            <td>{{pipeline.host}}</td>
-            <td>{{pipeline.title}}</td>
-            <td>{{pipeline.status}}</td>
-            <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.errorCount['1m']}}</span></td>
-            <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.errorCount['24h']}}</span></td>
-            <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['1m']}}</span></td>
-            <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['5m']}}</span></td>
-            <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['1h']}}</span></td>
-            <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.recordCount['24h']}}</span></td>
-            <td><span *ngIf="pipeline.metrics">{{pipeline.metrics.jvm['heapUsed']}}</span></td>
-            <td><button>start</button><button>stop</button></td>
-        </tr>
-      </tbody>
-    </table>
+  </header>
+  <clr-datagrid>
+    <clr-dg-column [clrDgField]="'hostname'">Host</clr-dg-column>
+    <clr-dg-column [clrDgField]="'title'">Name</clr-dg-column>
+    <clr-dg-column [clrDgField]="'status'">Status</clr-dg-column>
+    <clr-dg-column>Error Rate<br />(1m / 5m / 1h / 24h)</clr-dg-column>
+    <clr-dg-column>Record Rate<br />(1m / 5m / 1h / 24h)</clr-dg-column>
+    <clr-dg-column>JVM</clr-dg-column>
+    <clr-dg-row *clrDgItems="let pipeline of pipelines">
+      <clr-dg-cell>{{pipeline.host}}</clr-dg-cell>
+      <clr-dg-cell>{{pipeline.title}}</clr-dg-cell>
+      <clr-dg-cell><span class="{{pipeline.isWarningStatus()?'warning':''}}">{{pipeline.status}}</span></clr-dg-cell>
+      <clr-dg-cell><span *ngIf="pipeline.metrics">
+        {{pipeline.metrics.errorRate['1m']}} /
+        {{pipeline.metrics.errorRate['5m']}} /
+        {{pipeline.metrics.errorRate['1h']}} /
+        {{pipeline.metrics.errorRate['24h']}}
+      </span></clr-dg-cell>
+      <clr-dg-cell><span *ngIf="pipeline.metrics">
+        {{pipeline.metrics.recordRate['1m']}} /
+        {{pipeline.metrics.recordRate['5m']}} /
+        {{pipeline.metrics.recordRate['1h']}} /
+        {{pipeline.metrics.recordRate['24h']}}
+      </span></clr-dg-cell>
+      <clr-dg-cell><span *ngIf="pipeline.metrics">{{pipeline.metrics.jvm['heapUsed']}}</span></clr-dg-cell>
+      <clr-dg-row-detail *clrIfExpanded>
+        <pipeline-command [pipeline]="pipeline"></pipeline-command>
+      </clr-dg-row-detail>
+    </clr-dg-row>
+    <clr-dg-footer>끝</clr-dg-footer>
+  </clr-datagrid>
 </clr-main-container>
