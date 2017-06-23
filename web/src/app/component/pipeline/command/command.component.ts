@@ -1,7 +1,7 @@
-import {Pipeline} from '../../model/pipeline';
+import {Pipeline} from '../../../model/pipeline';
 import {Component, Input, OnInit, Pipe} from "@angular/core";
 import {Http} from "@angular/http";
-import {Status} from "../../model/status";
+import {Status} from "../../../model/status";
 
 @Component({
   selector: 'pipeline-command',

@@ -28,22 +28,7 @@ export class AppComponent {
   }
 
   private concatPipelineAndStatus = (pipeline, status) => Object.assign(pipeline, status);
-
-  private concatPipelineAndMetric = (pipeline, metric) => {
-    if (!pipeline.metrics){
-      pipeline.metrics = metric;
-    }
-
-    return pipeline;
-  };
-
-  private refinePipelineMetrics = pipeline => {
-    if (pipeline.metrics){
-      pipeline.metrics = this.parseMetrics(pipeline.metrics);
-    }
-
-    return pipeline;
-  };
+  private concatPipelineAndMetrics = (pipeline, metrics) => { pipeline.metrics = metrics; return pipeline;}
 
   initPipelines(hosts: string[]) {
     this.pipelines = [];
@@ -53,11 +38,18 @@ export class AppComponent {
       .flatMap( pipelinesData => Observable.from(pipelinesData))
       .map( rawData => new Pipeline(rawData) )
       .flatMap( (pipeline: Pipeline) => this.getStatus(pipeline), this.concatPipelineAndStatus)
-      .flatMap( (pipeline: Pipeline) => this.getMetrics(pipeline), this.concatPipelineAndMetric)
-      .map(this.refinePipelineMetrics)
+      .flatMap( (pipeline: Pipeline) => this.getMetrics(pipeline), this.concatPipelineAndMetrics)
       .subscribe( (pipeline: Pipeline) => {
         this.pipelines.push(pipeline);
+        this.intervalMetric(pipeline);
       });
+
+  }
+
+  intervalMetric(pipeline){
+    setInterval( () => {
+      this.getMetrics(pipeline).subscribe(metrics => pipeline.metrics = metrics);
+    }, 5000);
   }
 
   private getPipelines(host: String){
@@ -72,16 +64,10 @@ export class AppComponent {
     const id = pipeline.pipelineId;
 
     const url = `http://localhost:8000/api?host=${host}&path=/pipeline/${id}/metrics`;
-    return this.http.get(url).map( result => {
-      if ( result.text() ) {
-        return result.json()
-      }else{
-        return ""
-      }
-    })
+    return this.http.get(url).map( result => this.parseMetrics( result.text()? result.json(): ""));
   }
 
-  private getStatus(pipeline: any){
+  private getStatus(pipeline: Pipeline){
     const host = pipeline.host;
     const id = pipeline.pipelineId;
     const url = `http://localhost:8000/api?host=${host}&path=/pipeline/${id}/status`;
@@ -112,6 +98,24 @@ export class AppComponent {
         },
         "jvm": {
           "heapUsed": (metrics['gauges']['jvm.memory.heap.used']['value'] / 1024 / 1024 | 0) + 'MB'
+        }
+      };
+    }else{
+      return {
+        "errorRate": {
+          "1m": "N/A",
+          "5m": "N/A",
+          "1h": "N/A",
+          "24h": "N/A"
+        },
+        "recordRate": {
+          "1m": "N/A",
+          "5m": "N/A",
+          "1h": "N/A",
+          "24h": "N/A"
+        },
+        "jvm": {
+          "heapUsed": "N/A"
         }
       };
     }
