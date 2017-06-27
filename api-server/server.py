@@ -35,7 +35,7 @@ class Handler(BaseHTTPRequestHandler):
         path = parsed_url.path
 
         if is_index_path(path):
-            path = "index.html"
+            path = "/index.html"
 
         if path == "/api":
             self._do_api_request(parsed_url.query)

@@ -9,18 +9,29 @@ export enum Status{
 }
 
 export namespace Status{
-  export function warning(status: Status){
+
+  export function noting(status: Status){
     switch (status) {
-      case Status.START_ERROR:
-      case Status.RETRY:
       case Status.EDITED:
+      case Status.STOPPING:
+      case Status.STOPPED:
+      case Status.STARTING:
         return true;
       default:
         return false;
     }
   }
 
-  export function statusChaning(status: Status){
+  export function healthy(status: Status){
+    switch (status) {
+      case Status.RUNNING:
+          return true;
+      default:
+        return false;
+    }
+  }
+
+  export function statusChanging(status: Status){
     switch (status) {
       case Status.STARTING:
       case Status.STOPPING:

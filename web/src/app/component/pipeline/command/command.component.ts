@@ -44,19 +44,19 @@ export class CommandComponent implements OnInit{
     this.http[api.method](api.url)
       .map( response => response.json() )
       .subscribe( result => {
-        this.pipeline.status = <Status>result.status;
-        if ( Status.statusChaning(this.pipeline.status) ){
+        this.pipeline.setStatus(result.status);//<Status>result.status;
+        if ( this.pipeline.changingStatus() ){
           setTimeout( () => this.statusCheck(), 1000 );
         }
       });
   }
 
   isStarting(){
-    return this.pipeline.status == Status.STARTING;
+    return this.pipeline.getStatus() == Status.STARTING;
   }
 
   isStopping(){
-    return this.pipeline.status == Status.STOPPING;
+    return this.pipeline.getStatus() == Status.STOPPING;
   }
 }
 

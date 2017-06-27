@@ -17,12 +17,12 @@
     <clr-dg-row *clrDgItems="let pipeline of pipelines">
       <clr-dg-cell>{{pipeline.host}}</clr-dg-cell>
       <clr-dg-cell>{{pipeline.title}}</clr-dg-cell>
-      <clr-dg-cell><span class="{{pipeline.isWarningStatus()?'warning':''}}">{{pipeline.status}}</span></clr-dg-cell>
+      <clr-dg-cell><span class="status{{pipeline.warningStatus()?' warning':''}}{{pipeline.notingStatus()?' noting':''}}">{{pipeline.getStatusString()}}</span></clr-dg-cell>
       <clr-dg-cell><span *ngIf="pipeline.metrics">
-        {{pipeline.metrics.errorRate['1m']}} /
-        {{pipeline.metrics.errorRate['5m']}} /
-        {{pipeline.metrics.errorRate['1h']}} /
-        {{pipeline.metrics.errorRate['24h']}}
+        <span class="metric{{pipeline.metrics.errorRate['1m'] > 0?' warn':'' }}">{{pipeline.metrics.errorRate['1m']}}</span> /
+        <span class="metric{{pipeline.metrics.errorRate['5m'] > 0?' warn':'' }}">{{pipeline.metrics.errorRate['5m']}}</span> /
+        <span class="metric{{pipeline.metrics.errorRate['1h'] > 0?' warn':'' }}">{{pipeline.metrics.errorRate['1h']}}</span> /
+        <span class="metric{{pipeline.metrics.errorRate['24h'] > 0?' warn':'' }}">{{pipeline.metrics.errorRate['24h']}}</span>
       </span></clr-dg-cell>
       <clr-dg-cell><span *ngIf="pipeline.metrics">
         {{pipeline.metrics.recordRate['1m']}} /

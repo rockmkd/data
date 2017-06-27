@@ -1,24 +1,24 @@
-.warning {
-  /*-webkit-animation-duration: 5s;*/
-  /*-webkit-animation-name: warn-animation;*/
-  /*-webkit-animation-iteration-count: infinite;*/
+.status, .metric {
+  padding: 5px;
   padding: 5px;
   border-radius: 10px;
 }
 
-@-webkit-keyframes warn-animation {
-  form{
-    background-color: #fff;
-    color: #000;
-  }
+.metric{
+  padding: 3px;
+  padding: 3px;
+  border-radius: 5px;
+}
 
-  50% {
-    background-color: #f00;
-    color: #fff;
-  }
+.warning {
+  /*-webkit-animation-duration: 5s;*/
+  /*-webkit-animation-name: warn-animation;*/
+  /*-webkit-animation-iteration-count: infinite;*/
+  background-color: #f00;
+  color: #fff;
+}
 
-  to {
-    background-color: #fff;
-    color: #000;
-  }
+.noting {
+  background-color: #0f0;
+  color: #000;
 }
