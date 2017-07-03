@@ -47,7 +47,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def _do_api_request(self, query, data=None):
         query_data = parse_qs(query, 1)
-
+x
         response_data = ""
         try:
             host = query_data['host'][0]
