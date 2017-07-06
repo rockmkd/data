@@ -84,6 +84,11 @@ export class AppComponent {
   private parseMetrics(metrics: any){
     if ( metrics ){
       return {
+        "counter": {
+          "input": metrics['counters']['pipeline.batchInputRecords.counter']['count'],
+          "output": metrics['counters']['pipeline.batchOutputRecords.counter']['count'],
+          "error": metrics['counters']['pipeline.batchErrorRecords.counter']['count']
+        },
         "errorRate": {
           "1m": metrics['meters']['pipeline.batchErrorRecords.meter']['m1_rate'].toFixed(1),
           "5m": metrics['meters']['pipeline.batchErrorRecords.meter']['m5_rate'].toFixed(1),
@@ -101,7 +106,13 @@ export class AppComponent {
         }
       };
     }else{
+      // console.log(metrics['counters']['pipeline.batchInputRecords.counter']['count']);
       return {
+        "counter": {
+          "input": "N/A",
+          "output": "N/A",
+          "error": "N/A"
+        },
         "errorRate": {
           "1m": "N/A",
           "5m": "N/A",
