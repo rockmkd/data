@@ -24,7 +24,7 @@
         {{pipeline.metrics.counter['input']}} / {{pipeline.metrics.counter['output']}}
         </span></clr-dg-cell>
       <clr-dg-cell><span *ngIf="pipeline.metrics">
-        <span class="metric{{pipeline.metrics.counter['error'] > 0?' warn':'' }}">
+        <span class="metric{{pipeline.metrics.counter['error'] > 0 ?' warning':'' }}">
           {{pipeline.metrics.counter['error']}}
         </span>
       </span></clr-dg-cell>
