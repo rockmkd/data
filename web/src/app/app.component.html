@@ -11,20 +11,26 @@
     <clr-dg-column [clrDgField]="'hostname'">Host</clr-dg-column>
     <clr-dg-column [clrDgField]="'title'">Pipeline Name</clr-dg-column>
     <clr-dg-column [clrDgField]="'status'">Status</clr-dg-column>
-    <clr-dg-column>Total Count</clr-dg-column>
-    <clr-dg-column>Error Count</clr-dg-column>
+    <clr-dg-column [clrDgField]="'metrics.counter.input'">Count(In/Out)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'metrics.counter.error'">Error Count</clr-dg-column>
     <!--<clr-dg-column>Error Rate<br />(1m / 5m / 1h / 24h)</clr-dg-column>-->
     <clr-dg-column>Record Rate<br />(1m / 5m / 1h / 24h)</clr-dg-column>
-    <clr-dg-column>JVM</clr-dg-column>
+    <clr-dg-column [clrDgField]="'metrics.jvm.heapUsed'">JVM</clr-dg-column>
     <clr-dg-row *clrDgItems="let pipeline of pipelines">
-      <clr-dg-cell><a href="http://{{pipeline.host}}:18630" target="_blank">{{pipeline.host}}</a></clr-dg-cell>
-      <clr-dg-cell><a href="http://{{pipeline.host}}:18630/collector/pipeline/{{pipeline.pipelineId}}" target="_blank">{{pipeline.title}}</a></clr-dg-cell>
-      <clr-dg-cell><span class="status{{pipeline.warningStatus()?' warning':''}}{{pipeline.notingStatus()?' noting':''}}">{{pipeline.getStatusString()}}</span></clr-dg-cell>
+      <clr-dg-cell>
+        <a href="http://{{pipeline.host}}:18630" target="_blank">{{pipeline.host}}</a>
+      </clr-dg-cell>
+      <clr-dg-cell>
+        <a href="http://{{pipeline.host}}:18630/collector/pipeline/{{pipeline.pipelineId}}" target="_blank">{{pipeline.title}}</a>
+      </clr-dg-cell>
+      <clr-dg-cell>
+        <span class="status{{pipeline.warningStatus()?' warning':''}}{{pipeline.notingStatus()?' noting':''}}">{{pipeline.getStatusString()}}</span>
+      </clr-dg-cell>
       <clr-dg-cell><span *ngIf="pipeline.metrics">
         {{pipeline.metrics.counter['input']}} / {{pipeline.metrics.counter['output']}}
         </span></clr-dg-cell>
       <clr-dg-cell><span *ngIf="pipeline.metrics">
-        <span class="metric{{pipeline.metrics.counter['error'] > 0 ?' warning':'' }}">
+        <span class="status{{pipeline.metrics.counter['error'] > 0 ?' warning':'' }}">
           {{pipeline.metrics.counter['error']}}
         </span>
       </span></clr-dg-cell>
