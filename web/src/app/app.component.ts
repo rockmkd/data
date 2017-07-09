@@ -88,11 +88,12 @@ export class AppComponent {
 
   private parseMetrics(metrics: any){
     if ( metrics ){
+      // TODO find another way localestring
       return {
         "counter": {
-          "input": metrics['counters']['pipeline.batchInputRecords.counter']['count'],
-          "output": metrics['counters']['pipeline.batchOutputRecords.counter']['count'],
-          "error": metrics['counters']['pipeline.batchErrorRecords.counter']['count']
+          "input": metrics['counters']['pipeline.batchInputRecords.counter']['count'].toLocaleString(),
+          "output": metrics['counters']['pipeline.batchOutputRecords.counter']['count'].toLocaleString(),
+          "error": metrics['counters']['pipeline.batchErrorRecords.counter']['count'].toLocaleString()
         },
         "errorRate": {
           "1m": metrics['meters']['pipeline.batchErrorRecords.meter']['m1_rate'].toFixed(1),
@@ -101,13 +102,13 @@ export class AppComponent {
           "24h": metrics['meters']['pipeline.batchErrorRecords.meter']['h24_rate'].toFixed(1)
         },
         "recordRate": {
-          "1m": metrics['meters']['pipeline.batchInputRecords.meter']['m1_rate'].toFixed(1),
-          "5m": metrics['meters']['pipeline.batchInputRecords.meter']['m5_rate'].toFixed(1),
-          "1h": metrics['meters']['pipeline.batchInputRecords.meter']['h1_rate'].toFixed(1),
-          "24h": metrics['meters']['pipeline.batchInputRecords.meter']['h24_rate'].toFixed(1)
+          "1m": (metrics['meters']['pipeline.batchInputRecords.meter']['m1_rate'] * 60 | 0).toLocaleString(),
+          "5m": (metrics['meters']['pipeline.batchInputRecords.meter']['m5_rate'] * 60 * 5 | 0).toLocaleString(),
+          "1h": (metrics['meters']['pipeline.batchInputRecords.meter']['h1_rate'] * 60 * 60 | 0).toLocaleString(),
+          "24h": (metrics['meters']['pipeline.batchInputRecords.meter']['h24_rate'] * 60 * 60 * 24 | 0).toLocaleString()
         },
         "jvm": {
-          "heapUsed": (metrics['gauges']['jvm.memory.heap.used']['value'] / 1024 / 1024 | 0) + 'MB'
+          "heapUsed": (metrics['gauges']['jvm.memory.total.used']['value'] / 1024 / 1024 | 0) + 'MB'
         }
       };
     }else{

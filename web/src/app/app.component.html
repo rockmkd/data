@@ -25,7 +25,7 @@
         <a href="http://{{pipeline.host}}:18630/collector/pipeline/{{pipeline.pipelineId}}" target="_blank">{{pipeline.title}}</a>
       </clr-dg-cell>
       <clr-dg-cell>
-        {{ pipeline.timeStamp | date:'M월 d일 H:m' }}
+        {{ pipeline.timeStamp | date:'y-MM-d H:m' }}
       </clr-dg-cell>
       <clr-dg-cell>
         <span class="status{{pipeline.warningStatus()?' warning':''}}{{pipeline.notingStatus()?' noting':''}}">{{pipeline.getStatusString()}}</span>
