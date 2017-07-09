@@ -7,9 +7,7 @@ export class Pipeline{
   title: string;
   description: string;
   metrics: any;
-  lastModified: number;
-  valid: boolean;
-  metadata: any;
+  timeStamp: number;
 
   private status: Status;
 
@@ -24,6 +22,10 @@ export class Pipeline{
 
   setStatus(status: string){
     this.status = Status[status];
+  }
+
+  setTimeStamp(timeStamp: number){
+    this.timeStamp = timeStamp;
   }
 
   getStatus(){

@@ -27,7 +27,12 @@ export class AppComponent {
     });
   }
 
-  private concatPipelineAndStatus = (pipeline: Pipeline, status: any) => { pipeline.setStatus(status.status); return pipeline}
+  private concatPipelineAndStatus = (pipeline: Pipeline, status: any) => {
+    pipeline.setStatus(status.status);
+    pipeline.setTimeStamp(status.timeStamp);
+    return pipeline
+  };
+
   private concatPipelineAndMetrics = (pipeline, metrics) => { pipeline.metrics = metrics; return pipeline;}
 
   initPipelines(hosts: string[]) {

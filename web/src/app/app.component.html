@@ -10,6 +10,7 @@
   <clr-datagrid>
     <clr-dg-column [clrDgField]="'hostname'">Host</clr-dg-column>
     <clr-dg-column [clrDgField]="'title'">Pipeline Name</clr-dg-column>
+    <clr-dg-column [clrDgField]="'timeStamp'">uptime</clr-dg-column>
     <clr-dg-column [clrDgField]="'status'">Status</clr-dg-column>
     <clr-dg-column [clrDgField]="'metrics.counter.input'">Count(In/Out)</clr-dg-column>
     <clr-dg-column [clrDgField]="'metrics.counter.error'">Error Count</clr-dg-column>
@@ -22,6 +23,9 @@
       </clr-dg-cell>
       <clr-dg-cell>
         <a href="http://{{pipeline.host}}:18630/collector/pipeline/{{pipeline.pipelineId}}" target="_blank">{{pipeline.title}}</a>
+      </clr-dg-cell>
+      <clr-dg-cell>
+        {{ pipeline.timeStamp | date:'M월 d일 H:m' }}
       </clr-dg-cell>
       <clr-dg-cell>
         <span class="status{{pipeline.warningStatus()?' warning':''}}{{pipeline.notingStatus()?' noting':''}}">{{pipeline.getStatusString()}}</span>
